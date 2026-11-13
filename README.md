@@ -13,7 +13,7 @@ change in production. Target audience: platform engineers who are new to MLflow.
 ## Use case
 An assistant answers questions about fictitious suppliers taken from
 `samples.bakehouse.sales_suppliers` (synthetic Databricks sample data, read-only).
-The "model" has no weights: it is a prompt plus generation parameters around an
+The "model" has no weights: it is a prompt plus generation parameters around  an
 existing Foundation Model endpoint.
 
 ## Project layout
