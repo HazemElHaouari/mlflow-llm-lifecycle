@@ -1,9 +1,14 @@
 # Bundle de démonstration : cycle de vie d'un modèle LLM avec MLflow 3 et Unity Catalog.
+# Deux jobs : build_model (côté dev) fabrique une version, promote_model (côté cible)
+# l'évalue et la promeut. En prod, ce seraient deux workspaces ; ici, deux schémas.
 bundle:
   name: mlflow_llm_lifecycle
 
+# Liste explicite : on voit d'un coup d'oeil ce que le bundle déploie.
 include:
-  - resources/*.yml
+  - resources/llm_lifecycle.experiment.yml
+  - resources/build_model.job.yml
+  - resources/promote_model.job.yml
 
 # Toutes les valeurs spécifiques à l'environnement sont ici, jamais dans les notebooks.
 # Surcharge possible : databricks bundle deploy -t dev --var="catalog=my_catalog"
@@ -13,11 +18,14 @@ variables:
       Catalogue UC qui reçoit les tables, le schéma et le modèle. A adapter à votre
       workspace (il faut USE CATALOG et CREATE SCHEMA dessus).
     default: main
-  schema:
-    description: Schéma créé (IF NOT EXISTS) par la tâche setup_eval_data.
-    default: mlflow_llm_tutorial
+  dev_schema:
+    description: Schéma qui joue le rôle de "dev" (modèle candidat, FAQ). Créé par build_model.
+    default: mlflow_tuto_dev
+  prd_schema:
+    description: Schéma qui joue le rôle de "prd" (jeu d'évaluation, modèle champion). Créé par promote_model.
+    default: mlflow_tuto_prd
   model_name:
-    description: Nom court du modèle UC (nom complet = catalog.schema.model_name).
+    description: Nom court du modèle UC, identique en dev et en prd (catalog.<schema>.model_name).
     default: faq_assistant
   serving_endpoint:
     description: Endpoint Foundation Model appelé par le modèle (aucun fine-tuning).
