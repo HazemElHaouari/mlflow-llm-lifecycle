@@ -34,7 +34,7 @@ resources:
       tasks:
         - task_key: setup_knowledge
           notebook_task:
-            notebook_path: ../src/build/01_setup_knowledge.ipynb
+            notebook_path: ../src/build/01_setup_knowledge.py
             base_parameters:
               catalog: ${var.catalog}
               dev_schema: ${var.dev_schema}
@@ -43,7 +43,7 @@ resources:
         - task_key: train
           depends_on: [{task_key: setup_knowledge}]
           notebook_task:
-            notebook_path: ../src/build/02_train.ipynb
+            notebook_path: ../src/build/02_train.py
             base_parameters:
               catalog: ${var.catalog}
               dev_schema: ${var.dev_schema}

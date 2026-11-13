@@ -19,7 +19,7 @@ resources:
       tasks:
         - task_key: setup_eval_set
           notebook_task:
-            notebook_path: ../src/promote/01_setup_eval_set.ipynb
+            notebook_path: ../src/promote/01_setup_eval_set.py
             base_parameters:
               catalog: ${var.catalog}
               prd_schema: ${var.prd_schema}
@@ -29,7 +29,7 @@ resources:
         - task_key: evaluate
           depends_on: [{task_key: setup_eval_set}]
           notebook_task:
-            notebook_path: ../src/promote/02_evaluate.ipynb
+            notebook_path: ../src/promote/02_evaluate.py
             base_parameters:
               catalog: ${var.catalog}
               dev_schema: ${var.dev_schema}
@@ -42,7 +42,7 @@ resources:
         - task_key: validate
           depends_on: [{task_key: evaluate}]
           notebook_task:
-            notebook_path: ../src/promote/03_validate.ipynb
+            notebook_path: ../src/promote/03_validate.py
             base_parameters:
               catalog: ${var.catalog}
               dev_schema: ${var.dev_schema}
@@ -62,7 +62,7 @@ resources:
         - task_key: promote
           depends_on: [{task_key: check_gate, outcome: "true"}]
           notebook_task:
-            notebook_path: ../src/promote/04_promote.ipynb
+            notebook_path: ../src/promote/04_promote.py
             base_parameters:
               catalog: ${var.catalog}
               dev_schema: ${var.dev_schema}
@@ -76,7 +76,7 @@ resources:
         - task_key: skip_promotion
           depends_on: [{task_key: check_gate, outcome: "false"}]
           notebook_task:
-            notebook_path: ../src/promote/05_skip_promotion.ipynb
+            notebook_path: ../src/promote/05_skip_promotion.py
             base_parameters:
               catalog: ${var.catalog}
               dev_schema: ${var.dev_schema}
