@@ -1,6 +1,7 @@
 resources:
   experiments:
-    llm_lifecycle:
+    # La clé doit être unique dans tout le bundle, tous types de ressources confondus.
+    llm_lifecycle_experiment:
       # Expérience MLflow gérée par le bundle. Attention : "bundle destroy" la supprime
       # avec ses runs. En mode development, le nom est préfixé "[dev <utilisateur>]".
       name: /Users/${workspace.current_user.userName}/mlflow_llm_lifecycle_${bundle.target}

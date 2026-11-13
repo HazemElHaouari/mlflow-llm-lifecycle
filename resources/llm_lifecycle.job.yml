@@ -52,7 +52,7 @@ resources:
               model_name: ${var.model_name}
               serving_endpoint: ${var.serving_endpoint}
               # ID résolu au déploiement depuis la ressource experiment du bundle.
-              experiment_id: ${resources.experiments.llm_lifecycle.id}
+              experiment_id: ${resources.experiments.llm_lifecycle_experiment.id}
 
         - task_key: evaluate
           depends_on: [{task_key: train}]
@@ -62,7 +62,7 @@ resources:
               catalog: ${var.catalog}
               schema: ${var.schema}
               model_name: ${var.model_name}
-              experiment_id: ${resources.experiments.llm_lifecycle.id}
+              experiment_id: ${resources.experiments.llm_lifecycle_experiment.id}
               judge_model: ${var.judge_model}
               max_answer_chars: ${var.max_answer_chars}
 
