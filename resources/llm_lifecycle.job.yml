@@ -1,0 +1,110 @@
+resources:
+  jobs:
+    llm_lifecycle:
+      name: llm_faq_lifecycle
+      # Un seul run à la fois : deux runs simultanés déplaceraient l'alias "candidate"
+      # l'un sous l'autre.
+      max_concurrent_runs: 1
+      timeout_seconds: 3600
+
+      # Paramètres du job : modifiables à chaque run (--params). Ils sont visibles
+      # comme widgets dans tous les notebooks.
+      parameters:
+        - name: prompt_variant      # "good" ou "weak" (démonstration du gate)
+          default: good
+        - name: system_prompt       # vide = prompt système par défaut de la variante "good"
+          default: ""
+        - name: temperature
+          default: "0.1"
+        - name: max_tokens
+          default: "200"
+
+      # Aucun bloc de compute sur les tâches : elles tournent en serverless.
+      # Secours si serverless n'est pas disponible : décommenter ce bloc et ajouter
+      # "job_cluster_key: small" sur chaque tâche notebook.
+      # job_clusters:
+      #   - job_cluster_key: small
+      #     new_cluster:
+      #       spark_version: 16.4.x-cpu-ml-scala2.12
+      #       node_type_id: ${var.node_type_id}
+      #       num_workers: 0
+      #       spark_conf: {spark.master: "local[*]"}
+      #       custom_tags: {ResourceClass: SingleNode}
+      #       data_security_mode: SINGLE_USER
+
+      tasks:
+        - task_key: setup_eval_data
+          notebook_task:
+            notebook_path: ../src/00_setup_eval_data.py
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+              source_table: ${var.source_table}
+              eval_set_size: ${var.eval_set_size}
+
+        - task_key: train
+          depends_on: [{task_key: setup_eval_data}]
+          notebook_task:
+            notebook_path: ../src/01_train.py
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+              model_name: ${var.model_name}
+              serving_endpoint: ${var.serving_endpoint}
+              # ID résolu au déploiement depuis la ressource experiment du bundle.
+              experiment_id: ${resources.experiments.llm_lifecycle.id}
+
+        - task_key: evaluate
+          depends_on: [{task_key: train}]
+          notebook_task:
+            notebook_path: ../src/02_evaluate.py
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+              model_name: ${var.model_name}
+              experiment_id: ${resources.experiments.llm_lifecycle.id}
+              judge_model: ${var.judge_model}
+              max_answer_chars: ${var.max_answer_chars}
+
+        - task_key: validate
+          depends_on: [{task_key: evaluate}]
+          notebook_task:
+            notebook_path: ../src/03_validate.py
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+              model_name: ${var.model_name}
+              min_correctness: ${var.min_correctness}
+              min_keyword_rate: ${var.min_keyword_rate}
+              min_length_pass_rate: ${var.min_length_pass_rate}
+
+        # Condition task : rend la bifurcation visible dans le graphe du job.
+        # Elle lit la task value "decision" publiée par validate.
+        - task_key: check_gate
+          depends_on: [{task_key: validate}]
+          condition_task:
+            op: EQUAL_TO
+            left: "{{tasks.validate.values.decision}}"
+            right: passed
+
+        - task_key: promote
+          depends_on: [{task_key: check_gate, outcome: "true"}]
+          notebook_task:
+            notebook_path: ../src/04_promote.py
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+              model_name: ${var.model_name}
+              # Références dynamiques résolues à l'exécution : traçabilité de la promotion.
+              job_id: "{{job.id}}"
+              job_run_id: "{{job.run_id}}"
+              trigger_type: "{{job.trigger.type}}"
+
+        - task_key: skip_promotion
+          depends_on: [{task_key: check_gate, outcome: "false"}]
+          notebook_task:
+            notebook_path: ../src/05_skip_promotion.py
+            base_parameters:
+              catalog: ${var.catalog}
+              schema: ${var.schema}
+              model_name: ${var.model_name}

@@ -1,0 +1,57 @@
+# Bundle de démonstration : cycle de vie d'un modèle LLM avec MLflow 3 et Unity Catalog.
+bundle:
+  name: mlflow_llm_lifecycle
+
+include:
+  - resources/*.yml
+
+# Toutes les valeurs spécifiques à l'environnement sont ici, jamais dans les notebooks.
+# Surcharge possible : databricks bundle deploy -t dev --var="catalog=my_catalog"
+variables:
+  catalog:
+    description: >-
+      Catalogue UC qui reçoit les tables, le schéma et le modèle. A adapter à votre
+      workspace (il faut USE CATALOG et CREATE SCHEMA dessus).
+    default: main
+  schema:
+    description: Schéma créé (IF NOT EXISTS) par la tâche setup_eval_data.
+    default: mlflow_llm_tutorial
+  model_name:
+    description: Nom court du modèle UC (nom complet = catalog.schema.model_name).
+    default: faq_assistant
+  serving_endpoint:
+    description: Endpoint Foundation Model appelé par le modèle (aucun fine-tuning).
+    default: databricks-meta-llama-3-3-70b-instruct
+  judge_model:
+    description: >-
+      Modèle du juge LLM intégré. Format "databricks:/<endpoint>". Valeur "databricks"
+      possible pour le juge géré si les fonctions IA partenaires sont activées.
+    default: databricks:/databricks-claude-sonnet-4-6
+  source_table:
+    description: Table source en lecture seule (données synthétiques Databricks).
+    default: samples.bakehouse.sales_suppliers
+  eval_set_size:
+    description: Nombre de paires question/réponse attendue générées.
+    default: "15"
+  max_answer_chars:
+    description: Longueur maximale d'une réponse (scorer déterministe).
+    default: "600"
+  min_correctness:
+    description: Seuil minimal de correctness/mean (juge LLM) pour valider.
+    default: "0.8"
+  min_keyword_rate:
+    description: Seuil minimal de contains_expected_keyword/mean pour valider.
+    default: "0.8"
+  min_length_pass_rate:
+    description: Seuil minimal de answer_under_length_limit/mean pour valider.
+    default: "1.0"
+  node_type_id:
+    description: Utilisé uniquement par le cluster de secours (commenté dans le job).
+    default: Standard_D4ds_v5
+
+targets:
+  dev:
+    # mode development : préfixe "[dev <utilisateur>]" sur le job et l'expérience,
+    # met en pause d'éventuels schedules. Aucun host ici : il vient du profil CLI.
+    mode: development
+    default: true

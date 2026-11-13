@@ -1,0 +1,6 @@
+resources:
+  experiments:
+    llm_lifecycle:
+      # Expérience MLflow gérée par le bundle. Attention : "bundle destroy" la supprime
+      # avec ses runs. En mode development, le nom est préfixé "[dev <utilisateur>]".
+      name: /Users/${workspace.current_user.userName}/mlflow_llm_lifecycle_${bundle.target}
