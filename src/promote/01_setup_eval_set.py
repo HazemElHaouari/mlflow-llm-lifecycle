@@ -23,8 +23,10 @@ from common.params import get_param
 catalog = get_param(dbutils, "catalog")
 prd_schema = get_param(dbutils, "prd_schema")
 source_table = get_param(dbutils, "source_table")
-eval_set_size = int(get_param(dbutils, "eval_set_size"))
 
+eval_set_size = int(get_param(dbutils, "eval_set_size"))
+spark.sql("USE CATALOG IDENTIFIER(:c)", args={"c": catalog})
+   
 eval_table = f"{catalog}.{prd_schema}.faq_eval_set"
 
 # COMMAND ----------

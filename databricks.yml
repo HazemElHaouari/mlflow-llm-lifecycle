@@ -63,3 +63,6 @@ targets:
     # met en pause d'éventuels schedules. Aucun host ici : il vient du profil CLI.
     mode: development
     default: true
+    # Catalogue cible de ce workspace (le défaut "main" n'existe pas ici).
+    variables:
+      catalog: dev_training

@@ -21,8 +21,8 @@ from common.params import get_param
 catalog = get_param(dbutils, "catalog")
 dev_schema = get_param(dbutils, "dev_schema")
 source_table = get_param(dbutils, "source_table")
-
 knowledge_table = f"{catalog}.{dev_schema}.faq_knowledge"
+spark.sql("USE CATALOG IDENTIFIER(:c)", args={"c": catalog})
 
 # COMMAND ----------
 

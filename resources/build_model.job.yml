@@ -10,26 +10,28 @@ resources:
 
       # Paramètres modifiables à chaque run (--params). Visibles comme widgets dans les notebooks.
       parameters:
-        - name: prompt_variant      # "good" ou "weak" (démonstration du gate)
+        - name: prompt_variant # "good" ou "weak" (démonstration du gate)
           default: good
-        - name: system_prompt       # vide = prompt système par défaut de la variante "good"
+        - name: system_prompt # vide = prompt système par défaut de la variante "good"
           default: ""
         - name: temperature
           default: "0.1"
         - name: max_tokens
           default: "200"
 
-      # Aucun bloc de compute : les tâches tournent en serverless.
-      # Secours sans serverless : décommenter et ajouter "job_cluster_key: small" sur chaque tâche.
-      # job_clusters:
-      #   - job_cluster_key: small
-      #     new_cluster:
-      #       spark_version: 16.4.x-cpu-ml-scala2.12
-      #       node_type_id: ${var.node_type_id}
-      #       num_workers: 0
-      #       spark_conf: {spark.master: "local[*]"}
-      #       custom_tags: {ResourceClass: SingleNode}
-      #       data_security_mode: SINGLE_USER
+        - default: dev_training
+          name: catalog
+          # Aucun bloc de compute : les tâches tournent en serverless.
+          # Secours sans serverless : décommenter et ajouter "job_cluster_key: small" sur chaque tâche.
+          # job_clusters:
+          #   - job_cluster_key: small
+          #     new_cluster:
+          #       spark_version: 16.4.x-cpu-ml-scala2.12
+          #       node_type_id: ${var.node_type_id}
+          #       num_workers: 0
+          #       spark_conf: {spark.master: "local[*]"}
+          #       custom_tags: {ResourceClass: SingleNode}
+          #       data_security_mode: SINGLE_USER
 
       tasks:
         - task_key: setup_knowledge
